@@ -9,14 +9,16 @@ class Datasets extends Component {
 
   componentDidMount() {
     if (!process.env.REACT_APP_API_URL) throw new Error('REACT_APP_API_URL missing in env');
-    return this.getData.then(req => {
-      this.setState({
-        datasets: req.body
-      })
-    }).catch(err => {
-      this.setState({
-        error: err
-      })
+    return this.props.app_token.then(token => {
+      return this.getData.set('Authorization', 'Bearer ' + token).then(req => {
+        this.setState({
+          datasets: req.body
+        })
+      }).catch(err => {
+        this.setState({
+          error: err
+        })
+      });
     });
   }
 
