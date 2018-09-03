@@ -48,10 +48,17 @@ class Datasets extends Component {
 
     return (
       <div className="col-sm-9 border rounded">
-        <h1>Datasets</h1>
+        <h1 className="text-center">Datasets</h1>
         <table className="table table-bordered">
           <thead>
-            <tr><th>Name</th><th>Type</th><th>File type</th><th>Number of files</th><th>Start Date</th><th>End Date</th></tr>
+            <tr>
+              <th>Name</th>
+              <th>Type</th>
+              <th>File type</th>
+              <th>Number of files</th>
+              <th>Start Date</th>
+              <th>End Date</th>
+            </tr>
           </thead>
           <tbody>
             {datasets}
