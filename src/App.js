@@ -1,16 +1,12 @@
+// @flow
 import React, { Component } from 'react';
 import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom';
-import request from 'superagent';
 
 import Datasets from './Datasets';
+import Login from './Login';
 
 import './css/bootstrap-4.1.3.min.css';
 import './css/app.css';
-
-const getToken = async () => {
-  var res = await request.post(process.env.REACT_APP_API_URL + '/authentication/authenticate').send({username: 'admin@test.ode', password: 'password'});
-  return res.body.token;
-}
 
 const Navbar = () => (
   <div className="col-sm-3 border rounded">
@@ -21,7 +17,10 @@ const Navbar = () => (
   </div>
 );
 
-const OdeApp = (props) => (
+type OdeAppProps = {
+  app_token: string
+};
+const OdeApp = (props: OdeAppProps) => (
   <div className="container">
     <div className="row text-center">
       <div className="col-sm-12"><h1>Ocean Data Explorer</h1></div>
@@ -36,19 +35,34 @@ const OdeApp = (props) => (
   </div>
 );
 
-class App extends Component {
+type AppState = {
+  app_token: string
+};
+class App extends Component<void, AppState> {
   state = {
-    app_token: getToken()
+    app_token: ''
+  }
+
+  handleToken = (token: string) => {
+    this.setState({
+      app_token: token
+    })
   }
 
   render() {
-    return (
-      <Router>
-        <Switch>
-          <Route render={() => <OdeApp app_token={this.state.app_token} />} />
-        </Switch>
-      </Router>
-    )
+    if (this.state.app_token) {
+      return (
+        <Router>
+          <Switch>
+            <Route render={() => <OdeApp app_token={this.state.app_token} />} />
+          </Switch>
+        </Router>
+      )
+    } else {
+      return (
+        <Login handleToken={this.handleToken} />
+      )
+    }
   }
 }
 
