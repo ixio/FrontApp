@@ -43,10 +43,23 @@ class App extends Component<void, AppState> {
     app_token: ''
   }
 
+  componentDidMount() {
+    if (document.cookie) {
+      let tokenItem = document.cookie.split(';').filter((item) => item.includes('token='))[0];
+      if (tokenItem) {
+        this.setState({
+          app_token: tokenItem.split('=').pop()
+        })
+      }
+    }
+  }
+
   handleToken = (token: string) => {
     this.setState({
       app_token: token
-    })
+    });
+    // Cookie is set to expire after 30 days
+    document.cookie = 'token=' + token + ';max-age=2592000';
   }
 
   render() {
