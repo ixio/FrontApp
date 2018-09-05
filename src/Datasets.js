@@ -36,6 +36,11 @@ class Datasets extends Component<DatasetsProps, DatasetsState> {
         datasets: req.body
       })
     }).catch(err => {
+      if (err.status && err.status === 401) {
+        // Server returned 401 which means token was revoked
+        document.cookie = 'token=;max-age=0';
+        window.location.reload();
+      }
       this.setState({
         error: err
       })
