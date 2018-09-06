@@ -1,7 +1,7 @@
 import assert from 'assert';
 import React from 'react';
 import { mount, shallow } from 'enzyme';
-import jsdom from 'jsdom';
+import nock from 'nock';
 
 import App from '../src/App';
 import Navbar from '../src/App';
@@ -53,5 +53,20 @@ describe('testing App component', function () {
         assert.deepEqual(wrapper.find(AnnotationCampaignList).length, 0, 'There should be no AnnotationCampaignList after clicking first Navbar link');
         assert.deepEqual(wrapper.find(DatasetList).length, 1, 'DatasetList not found after clicking first Navbar link');
         wrapper.unmount();
+    });
+
+    it('tries to return to login when getting 401 error on subcomponent authentified api call', () => {
+        nock(process.env.REACT_APP_API_URL).get('/dataset/list').reply(401);
+        document.cookie = 'token=testWrongToken';
+        let wrapper = mount(<App />);
+        let datasetList = wrapper.find(DatasetList);
+        return datasetList.instance().componentDidMount().then(() => {
+            wrapper.update();
+            wrapper.unmount();
+        }).catch(err => {
+            assert.deepEqual(err.message, 'Not implemented: navigation (except hash changes)', 'Wrong error');
+            assert.deepEqual(document.cookie, '', 'Cookie should have been emptied');
+            wrapper.unmount();
+        });
     });
 });
