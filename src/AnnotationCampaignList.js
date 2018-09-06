@@ -78,7 +78,7 @@ class AnnotationCampaignList extends Component<ACLProps, ACLState> {
 
     return (
       <div className="col-sm-9 border rounded">
-        <h1>Annotation Campaigns</h1>
+        <h1 className="text-center">Annotation Campaigns</h1>
         <table className="table table-bordered">
           <thead>
             <tr>
@@ -95,7 +95,7 @@ class AnnotationCampaignList extends Component<ACLProps, ACLState> {
           {annotation_campaigns}
           </tbody>
         </table>
-        <p><Link to="#" className="btn btn-primary">New annotation campaign</Link></p>
+        <p className="text-center"><Link to="#" className="btn btn-primary">New annotation campaign</Link></p>
       </div>
     )
   }

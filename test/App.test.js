@@ -43,7 +43,6 @@ describe('testing App component', function () {
         assert.deepEqual(wrapper.find(DatasetList).length, 1, 'DatasetList not found as default page');
         // Testing AnnotationCampaignList link
         changeURL(links.at(1).props().href);
-        //window.location.assign('http://localhost/annotation-campaign/');
         wrapper.update();
         assert.deepEqual(wrapper.find(DatasetList).length, 0, 'There should be no DatasetList after clicking second Navbar link');
         assert.deepEqual(wrapper.find(AnnotationCampaignList).length, 1, 'AnnotationCampaignList not found after clicking second Navbar link');
