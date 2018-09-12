@@ -17,15 +17,6 @@ type choices_type = {
   }
 };
 
-type annotation_sets_type = {
-  [?number]: {
-    id: number,
-    tags: {
-      annotationTag: Array<string>
-    }
-  }
-};
-
 type ListChooserProps = {
   choice_type: string,
   chosen_list: choices_type,
@@ -53,8 +44,8 @@ class ListChooser extends Component<ListChooserProps> {
       });
       select_choice = (
         <div className="col-sm-3">
-          <select value='placeholder' className="form-control" onChange={this.props.onSelectChange}>
-            <option value='placeholder' disabled>Select a {this.props.choice_type}</option>
+          <select id={'cac-' + this.props.choice_type} value="placeholder" className="form-control" onChange={this.props.onSelectChange}>
+            <option value="placeholder" disabled>Select a {this.props.choice_type}</option>
             {choices_list}
           </select>
         </div>
@@ -70,14 +61,23 @@ class ListChooser extends Component<ListChooserProps> {
   }
 }
 
+type annotation_set_type = {
+  id: number,
+  name: string,
+  desc: string,
+  tags: Array<string>
+};
+
 type ShowAnnotationSetProps = {
-  annotation_sets: annotation_sets_type,
+  annotation_sets: {
+    [?number]: annotation_set_type
+  },
   onChange: (event: SyntheticEvent<HTMLInputElement>) => void
 };
 
 type ShowAnnotationSetState = {
   selected_id: number,
-  tags: Array<string>
+  selected: ?annotation_set_type
 };
 
 class ShowAnnotationSet extends Component<ShowAnnotationSetProps, ShowAnnotationSetState> {
@@ -106,7 +106,7 @@ class ShowAnnotationSet extends Component<ShowAnnotationSetProps, ShowAnnotation
     return (
       <div className="form-group">
         <div className="col-sm-4 offset-sm-4">
-          <select value={this.state.selected_id} className="form-control" onChange={this.handleOnChange}>
+          <select id="cac-annotation-set" value={this.state.selected_id} className="form-control" onChange={this.handleOnChange}>
             <option value={0} disabled>Select an annotation set</option>
             {options}
           </select>
@@ -140,7 +140,9 @@ type CACState = {
   new_ac_annotation_goal: number,
   new_ac_annotation_method: number,
   dataset_choices: choices_type,
-  annotation_set_choices: annotation_sets_type,
+  annotation_set_choices: {
+    [?number]: annotation_set_type
+  },
   annotator_choices: choices_type,
   error: ?{
     status: number,
@@ -170,6 +172,8 @@ class CreateAnnotationCampaign extends Component<CACProps, CACState> {
   postAnnotationCampaign = { abort: () => null }
 
   componentDidMount() {
+    // TODO the following error handling is very messy
+    // This should be fixed in a future rework of API calls
     return Promise.all([
       this.getDatasets.set('Authorization', 'Bearer ' + this.props.app_token).then(req => {
         this.setState({
@@ -321,19 +325,16 @@ class CreateAnnotationCampaign extends Component<CACProps, CACState> {
       annotation_method: this.state.new_ac_annotation_method
     };
     this.postAnnotationCampaign = request.post(POST_ANNOTATION_CAMPAIGN_API_URL);
-    this.postAnnotationCampaign.set('Authorization', 'Bearer ' + this.props.app_token).send(res)
+    return this.postAnnotationCampaign.set('Authorization', 'Bearer ' + this.props.app_token).send(res)
     .then(() => {
-      //this.props.history.push('/annotation-campaigns');
-        this.setState({
-          error: { message: 'good job!' }
-        });
+      this.props.history.push('/annotation-campaigns');
     }).catch(err => {
       if (err.status && err.status === 401) {
         // Server returned 401 which means token was revoked
         document.cookie = 'token=;max-age=0';
         window.location.reload();
       }
-      if (err.status && err.response) {
+      else if (err.status && err.response) {
         this.setState({
           error: err
         });
@@ -353,11 +354,11 @@ class CreateAnnotationCampaign extends Component<CACProps, CACState> {
         }
         <form onSubmit={this.handleSubmit}>
           <div className="form-group">
-            <input className="form-control" type="text" value={this.state.new_ac_name} onChange={this.handleNameChange} placeholder="Campaign Name" />
+            <input id="cac-name" className="form-control" type="text" value={this.state.new_ac_name} onChange={this.handleNameChange} placeholder="Campaign Name" />
           </div>
 
           <div className="form-group">
-            <textarea className="form-control" value={this.state.new_ac_desc} onChange={this.handleDescChange} placeholder="Description" />
+            <textarea id="cac-desc" className="form-control" value={this.state.new_ac_desc} onChange={this.handleDescChange} placeholder="Description" />
           </div>
 
           <div className="form-group">
@@ -366,10 +367,10 @@ class CreateAnnotationCampaign extends Component<CACProps, CACState> {
 
           <div className="form-group row">
             <div className="col-sm-6">
-              <input className="form-control" type="text" value={this.state.new_ac_start} onChange={this.handleStartChange} placeholder="Start Date" />
+              <input id="cac-start" className="form-control" type="text" value={this.state.new_ac_start} onChange={this.handleStartChange} placeholder="Start Date" />
             </div>
             <div className="col-sm-6">
-              <input className="form-control" type="text" value={this.state.new_ac_end} onChange={this.handleEndChange} placeholder="End Date" />
+              <input id="cac-end" className="form-control" type="text" value={this.state.new_ac_end} onChange={this.handleEndChange} placeholder="End Date" />
             </div>
           </div>
 
@@ -385,14 +386,14 @@ class CreateAnnotationCampaign extends Component<CACProps, CACState> {
           <div className="form-group row">
             <label className="col-sm-5 col-form-label">Wanted number of annotations per file:</label>
             <div className="col-sm-2">
-              <input className="form-control" type="number" value={this.state.new_ac_annotation_goal} onChange={this.handleAnnotationGoalChange} />
+              <input id="cac-annotation-goal" className="form-control" type="number" value={this.state.new_ac_annotation_goal} onChange={this.handleAnnotationGoalChange} />
             </div>
           </div>
 
           <div className="form-group row">
             <label className="col-sm-7 col-form-label">Wanted distribution method for files amongst annotators:</label>
             <div className="col-sm-3">
-              <select value={this.state.new_ac_annotation_method} className="form-control" onChange={this.handleAnnotationMethodChange}>
+              <select id="cac-annotation-method" value={this.state.new_ac_annotation_method} className="form-control" onChange={this.handleAnnotationMethodChange}>
                 <option value={-1} disabled>Select a method</option>
                 <option value={0}>Random</option>
                 <option value={1}>Sequential</option>
@@ -409,3 +410,4 @@ class CreateAnnotationCampaign extends Component<CACProps, CACState> {
 }
 
 export default CreateAnnotationCampaign;
+export { ListChooser, ShowAnnotationSet};
