@@ -1,30 +1,39 @@
+// @flow
 import React, { Component } from 'react';
 
 import './css/font-awesome-4.7.0.min.css';
 import './css/audio-annotator/materialize.min.css';
 import './css/audio-annotator/audio-annotator.css';
 
-//function insert_script(script_info, url=true)
+if (!process.env.REACT_APP_API_URL) throw new Error('REACT_APP_API_URL missing in env');
+const API_URL = process.env.REACT_APP_API_URL + '/annotation-task';
 
-function load_script(script_url) {
+function insert_script(script_info, url) {
   const script = document.createElement('script');
   script.type = 'text/javascript';
-  script.src = script_url;
+  if (url) {
+    script.src = script_info;
+  } else {
+    script.innerHTML = script_info;
+  }
   script.async = false;
   script.defer = true;
+  if (!document.body) throw new Error("Unexpectedly missing <body>");
   document.body.appendChild(script);
 }
+const load_script = script_url => insert_script(script_url, true);
+const run_script = script_code => insert_script(script_code, false);
 
-function run_script(script_code) {
-  const script = document.createElement('script');
-  script.type = 'text/javascript';
-  script.innerHTML = script_code;
-  script.async = false;
-  script.defer = true;
-  document.body.appendChild(script);
-}
+type AudioAnnotatorProps = {
+  match: {
+    params: {
+      annotation_task_id: number
+    }
+  },
+  app_token: string
+};
 
-class AudioAnnotator extends Component {
+class AudioAnnotator extends Component<AudioAnnotatorProps> {
   componentDidMount() {
     let annotation_task_id = this.props.match.params.annotation_task_id;
     load_script("/audio-annotator/static/js/lib/jquery-2.2.3.min.js");
@@ -41,8 +50,8 @@ class AudioAnnotator extends Component {
     load_script("/audio-annotator/static/js/src/annotation_stages.js");
     load_script("/audio-annotator/static/js/src/main.js");
     let script = `
-      var dataUrl = '${process.env.REACT_APP_API_URL}/annotation-task/${annotation_task_id}';
-      var postUrl = '${process.env.REACT_APP_API_URL}/annotation-task/${annotation_task_id}/update_results';
+      var dataUrl = '${API_URL}/${annotation_task_id}';
+      var postUrl = '${API_URL}/${annotation_task_id}/update_results';
       var odeToken = '${this.props.app_token}'
     `;
     run_script(script);
