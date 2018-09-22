@@ -76,6 +76,19 @@ class Login extends Component<LoginProps, LoginState> {
               </div>
               <input className="btn btn-primary" type="submit" value="Submit" />
             </form>
+            <br />
+            <h3>Possible logins for demo:</h3>
+            <table>
+              <thead><tr><th>Login</th><th>Password</th></tr></thead>
+              <tbody>
+                <tr><td>admin@test.ode</td><td>password</td></tr>
+                <tr><td>dc@test.ode</td><td>password</td></tr>
+                <tr><td>ek@test.ode</td><td>password</td></tr>
+                <tr><td>ja@test.ode</td><td>password</td></tr>
+                <tr><td>pnhd@test.ode</td><td>password</td></tr>
+                <tr><td>ad@test.ode</td><td>password</td></tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
