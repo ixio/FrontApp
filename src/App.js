@@ -1,6 +1,6 @@
 // @flow
 import React, { Component } from 'react';
-import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Switch, Route, Link, Redirect } from 'react-router-dom';
 
 import Login from './Login';
 import DatasetList from './DatasetList';
@@ -9,6 +9,7 @@ import AnnotationCampaignDetail from './AnnotationCampaignDetail';
 import CreateAnnotationCampaign from './CreateAnnotationCampaign';
 import AnnotationTaskList from './AnnotationTaskList';
 import AudioAnnotator from './AudioAnnotator';
+import LocalAudioAnnotator from './LocalAudioAnnotator';
 
 import './css/bootstrap-4.1.3.min.css';
 import './css/app.css';
@@ -18,6 +19,8 @@ const Navbar = (props) => (
     <ul>
       <li><Link to="/datasets">Datasets</Link></li>
       <li><Link to="/annotation-campaigns">Annotation campaigns</Link></li>
+      <li><Link to="/local-annotation">Test local annotation</Link></li>
+      <br />
       <li><button className="btn btn-secondary" onClick={props.logout}>Logout</button></li>
     </ul>
   </div>
@@ -86,6 +89,8 @@ class App extends Component<void, AppState> {
         <Router>
           <Switch>
             <Route path='/audio-annotator/:annotation_task_id' render={route_props => <AudioAnnotator app_token={this.state.app_token} {...route_props} />} />
+            <Route path='/annotation_tasks/0' render={() => <Redirect to="/local-annotation" /> } />
+            <Route path='/local-annotation' render={route_props => <LocalAudioAnnotator app_token={this.state.app_token} logout={() => this.logout(route_props.history)} />} />
             <Route render={route_props => <OdeApp app_token={this.state.app_token} logout={() => this.logout(route_props.history)} />} />
           </Switch>
         </Router>
@@ -99,3 +104,4 @@ class App extends Component<void, AppState> {
 }
 
 export default App;
+export { Navbar };

@@ -25,17 +25,32 @@ const load_script = script_url => insert_script(script_url, true);
 const run_script = script_code => insert_script(script_code, false);
 
 type AudioAnnotatorProps = {
-  match: {
+  match?: {
     params: {
       annotation_task_id: number
     }
+  },
+  task?: {
+    dataUrl: string,
+    postUrl: string
   },
   app_token: string
 };
 
 class AudioAnnotator extends Component<AudioAnnotatorProps> {
   componentDidMount() {
-    let annotation_task_id = this.props.match.params.annotation_task_id;
+    let dataUrl = '';
+    let postUrl = '';
+    if (this.props.task) {
+      dataUrl = this.props.task.dataUrl;
+      postUrl = this.props.task.postUrl;
+    } else if (this.props.match.params.annotation_task_id) {
+      let annotation_task_id = this.props.match.params.annotation_task_id.toString();
+      dataUrl = API_URL + '/' + annotation_task_id;
+      postUrl = API_URL + '/' + annotation_task_id + '/update_results';
+    } else {
+      throw new Error('Missing correct props');
+    }
     load_script("/audio-annotator/static/js/lib/jquery-2.2.3.min.js");
     load_script("/audio-annotator/static/js/lib/materialize.min.js");
     load_script("/audio-annotator/static/js/lib/wavesurfer.min.js");
@@ -50,8 +65,8 @@ class AudioAnnotator extends Component<AudioAnnotatorProps> {
     load_script("/audio-annotator/static/js/src/annotation_stages.js");
     load_script("/audio-annotator/static/js/src/main.js");
     let script = `
-      var dataUrl = '${API_URL}/${annotation_task_id}';
-      var postUrl = '${API_URL}/${annotation_task_id}/update_results';
+      var dataUrl = '${dataUrl}';
+      var postUrl = '${postUrl}';
       var odeToken = '${this.props.app_token}'
     `;
     run_script(script);
