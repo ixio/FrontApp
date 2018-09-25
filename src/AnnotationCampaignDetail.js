@@ -88,6 +88,20 @@ class AnnotationCampaignDetail extends Component<ACDProps, ACDState> {
     this.getUsers.abort();
   }
 
+  getReport = () => {
+    return request.get(REPORT_API_URL + this.props.match.params.campaign_id)
+    .set('Authorization', 'Bearer ' + this.props.app_token)
+    .then(res => {
+      let filename;
+      if (this.state.campaign.name) {
+        filename = this.state.campaign.name.replace(' ', '_') + '.csv';
+      } else {
+        filename = 'campaign_report.csv';
+      }
+      window.location = URL.createObjectURL(new File([res.text], filename, {type : 'text/csv'}));
+    })
+  }
+
   render() {
     let annotation_tasks = this.state.tasks.map(task => {
       return (
@@ -143,7 +157,7 @@ class AnnotationCampaignDetail extends Component<ACDProps, ACDState> {
           {annotation_tasks}
           </tbody>
         </table>
-        <p className="text-center"><a href={REPORT_API_URL + this.props.match.params.campaign_id} className="btn btn-primary">Download CSV results</a></p>
+        <p className="text-center"><button onClick={this.getReport} className="btn btn-primary">Download CSV results</button></p>
       </div>
     )
   }
