@@ -51,7 +51,7 @@ class AudioAnnotator extends Component<AudioAnnotatorProps> {
     load_script("/audio-annotator/static/js/src/main.js");
     let script = `
       var dataUrl = '${API_URL}/${annotation_task_id}';
-      var postUrl = '${API_URL}/${annotation_task_id}/update_results';
+      var postUrl = '${API_URL}/${annotation_task_id}/update-results';
       var odeToken = '${this.props.app_token}'
     `;
     run_script(script);
