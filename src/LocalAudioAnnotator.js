@@ -73,7 +73,7 @@ class LocalAudioAnnotator extends Component {
       return (
         <div className="container">
           <div className="row text-center">
-            <div className="col-sm-12"><h1>Ocean Data Explorer</h1></div>
+            <div className="col-sm-12"><h1></h1></div>
           </div>
           <div className="row text-left h-100 main">
             <Navbar logout={this.props.logout}/>
