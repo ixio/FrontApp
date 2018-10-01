@@ -7,6 +7,46 @@ const API_URL = process.env.REACT_APP_API_URL + '/annotation-campaign/';
 const USER_API_URL = process.env.REACT_APP_API_URL + '/user/list';
 const REPORT_API_URL = process.env.REACT_APP_API_URL + '/annotation-campaign/report/';
 
+
+type DownloadButtonProps = {
+  url: string,
+  app_token: string,
+  filename: string,
+  value: string
+};
+class DownloadButton extends Component<DownloadButtonProps> {
+  getDownload = request.get(this.props.url)
+  url = ''
+
+  componentWillUnmount() {
+    this.getDownload.abort();
+    URL.revokeObjectURL(this.url);
+  }
+
+  onClick = () => {
+    return this.getDownload
+    .set('Authorization', 'Bearer ' + this.props.app_token)
+    .then(res => {
+      this.url = URL.createObjectURL(new File([res.text], {type : res.header['content-type']}));
+      // Using <a>-linking trick https://stackoverflow.com/a/19328891/2730032
+      let a = document.createElement('a');
+      a.style = "display: none";
+      a.href = this.url;
+      a.type = res.header['content-type'];
+      a.download = this.props.filename;
+      document.body.appendChild(a);
+      a.click();
+    })
+  }
+
+
+  render() {
+    return (
+      <button onClick={this.onClick} className="btn btn-primary">{this.props.value}</button>
+    );
+  }
+}
+
 type ACDProps = {
   match: {
     params: {
@@ -88,20 +128,6 @@ class AnnotationCampaignDetail extends Component<ACDProps, ACDState> {
     this.getUsers.abort();
   }
 
-  getReport = () => {
-    return request.get(REPORT_API_URL + this.props.match.params.campaign_id)
-    .set('Authorization', 'Bearer ' + this.props.app_token)
-    .then(res => {
-      let filename;
-      if (this.state.campaign.name) {
-        filename = this.state.campaign.name.replace(' ', '_') + '.csv';
-      } else {
-        filename = 'campaign_report.csv';
-      }
-      window.location = URL.createObjectURL(new File([res.text], filename, {type : 'text/csv'}));
-    })
-  }
-
   render() {
     let annotation_tasks = this.state.tasks.map(task => {
       return (
@@ -157,7 +183,14 @@ class AnnotationCampaignDetail extends Component<ACDProps, ACDState> {
           {annotation_tasks}
           </tbody>
         </table>
-        <p className="text-center"><button onClick={this.getReport} className="btn btn-primary">Download CSV results</button></p>
+        <p className="text-center">
+          <DownloadButton
+            app_token={this.props.app_token}
+            url={REPORT_API_URL + this.props.match.params.campaign_id}
+            value={"Download CSV results"}
+            filename={this.state.campaign.name.replace(' ', '_') + '.csv'}
+          />
+        </p>
       </div>
     )
   }
