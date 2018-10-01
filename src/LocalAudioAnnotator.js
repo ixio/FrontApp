@@ -16,7 +16,8 @@ class LocalAudioAnnotator extends Component {
     annotation_set: null,
     annotation_set_choices: {},
     file: null,
-    task: null
+    task: null,
+    sample_rate: 44100
   }
   getAnnotationSets = request.get(GET_ANNOTATION_SETS_API_URL)
 
@@ -42,7 +43,26 @@ class LocalAudioAnnotator extends Component {
   }
 
   handleFileChange = (event: SyntheticEvent<HTMLInputElement>) => {
-    this.setState({ file: event.target.files[0] });
+    let file = event.target.files[0]
+    this.setState({ file: file });
+    // Sample rate is coded on wav files on byte 24 and 25
+    let reader = new FileReader();
+    reader.onload = () => {
+      window.odeResult = reader.result;
+      let sample_rate = new Int32Array(reader.result)[0];
+      this.setState({
+        sample_rate: Math.max(8000, sample_rate)
+      });
+      if (sample_rate < 8000) {
+        let msg = "Sample rate is lower than 8000 (" + sample_rate.toString() + "), it won't show correctly"
+        this.setState({
+          error: {
+            message: msg
+          }
+        });
+      }
+    };
+    reader.readAsArrayBuffer(file.slice(24,28));
   }
 
   handleSubmit = (event: SyntheticEvent<HTMLInputElement>) => {
@@ -67,7 +87,7 @@ class LocalAudioAnnotator extends Component {
   render() {
     if (this.state.task) {
       return (
-        <AudioAnnotator app_token={this.props.app_token} task={this.state.task} />
+        <AudioAnnotator app_token={this.props.app_token} task={this.state.task} sample_rate={this.state.sample_rate}/>
       );
     } else {
       return (
@@ -80,6 +100,9 @@ class LocalAudioAnnotator extends Component {
             <div className="col-sm-9 border rounded">
               <h1 className="text-center">Test Annotation on local file</h1>
               <br />
+              {this.state.error &&
+                <p className="error-message">{this.state.error.message}</p>
+              }
               <form onSubmit={this.handleSubmit}>
                 <div className="form-group">
                   <ShowAnnotationSet annotation_sets={this.state.annotation_set_choices} onChange={this.handleAnnotationSetChange} />

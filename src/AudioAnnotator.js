@@ -39,6 +39,11 @@ type AudioAnnotatorProps = {
 
 class AudioAnnotator extends Component<AudioAnnotatorProps> {
   componentDidMount() {
+    if (this.props.sample_rate) {
+      window.odeSampleRate = this.props.sample_rate;
+    } else if (this.props.match.params.sample_rate) {
+      window.odeSampleRate = this.props.match.params.sample_rate;
+    }
     let dataUrl = '';
     let postUrl = '';
     if (this.props.task) {
