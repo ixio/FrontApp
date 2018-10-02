@@ -27,13 +27,14 @@ class DownloadButton extends Component<DownloadButtonProps> {
     return this.getDownload
     .set('Authorization', 'Bearer ' + this.props.app_token)
     .then(res => {
-      this.url = URL.createObjectURL(new File([res.text], {type : res.header['content-type']}));
+      this.url = URL.createObjectURL(new File([res.text], this.props.filename, {type : res.header['content-type']}));
       // Using <a>-linking trick https://stackoverflow.com/a/19328891/2730032
       let a = document.createElement('a');
-      a.style = "display: none";
+      a.style.display = "none";
       a.href = this.url;
       a.type = res.header['content-type'];
       a.download = this.props.filename;
+      if (!document.body) throw new Error("Unexpectedly missing <body>");
       document.body.appendChild(a);
       a.click();
     })
@@ -155,21 +156,18 @@ class AnnotationCampaignDetail extends Component<ACDProps, ACDState> {
       )
     }
 
+    let { campaign } = this.state;
     return (
       <div className="col-sm-9 border rounded">
-        <h1 className="text-center">{this.state.campaign.name}</h1>
+        <h1 className="text-center">{campaign.name}</h1>
         <div className="row">
-          <div className="col-sm-4"><b>Annotation set:</b> #{this.state.campaign.annotation_set_id}</div>
-          <div className="col-sm-4"><b>Start:</b> {new Date(this.state.campaign.start).toLocaleDateString()}</div>
-        {this.state.campaign  && this.state.campaign.end && // This is needed for Flow which doesn't make much sense
-          <div className="col-sm-4"><b>End:</b> {new Date(this.state.campaign.end).toLocaleDateString()}</div>
-        }
+          <div className="col-sm-4"><b>Annotation set:</b> #{campaign.annotation_set_id}</div>
+          <div className="col-sm-4"><b>Start:</b> {new Date(campaign.start).toLocaleDateString()}</div>
+          <div className="col-sm-4"><b>End:</b> {new Date(campaign.end).toLocaleDateString()}</div>
         </div>
         <div className="col-sm-12 border rounder">
           <center><h3>Description</h3></center>
-          {this.state.campaign && this.state.campaign.desc && // This is needed for Flow which doesn't make much sense
-            this.state.campaign.desc
-          }
+          {campaign.desc}
         </div>
         <br />
         <table className="table table-bordered">
@@ -188,7 +186,7 @@ class AnnotationCampaignDetail extends Component<ACDProps, ACDState> {
             app_token={this.props.app_token}
             url={REPORT_API_URL + this.props.match.params.campaign_id}
             value={"Download CSV results"}
-            filename={this.state.campaign.name.replace(' ', '_') + '.csv'}
+            filename={campaign.name.replace(' ', '_') + '.csv'}
           />
         </p>
       </div>
