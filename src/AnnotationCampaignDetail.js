@@ -7,7 +7,6 @@ const API_URL = process.env.REACT_APP_API_URL + '/annotation-campaign/';
 const USER_API_URL = process.env.REACT_APP_API_URL + '/user/list';
 const REPORT_API_URL = process.env.REACT_APP_API_URL + '/annotation-campaign/report/';
 
-
 type DownloadButtonProps = {
   url: string,
   app_token: string,
@@ -39,7 +38,6 @@ class DownloadButton extends Component<DownloadButtonProps> {
       a.click();
     })
   }
-
 
   render() {
     return (
@@ -82,10 +80,11 @@ class AnnotationCampaignDetail extends Component<ACDProps, ACDState> {
     tasks: [],
     error: null
   }
-  getData = request.get(API_URL + this.props.match.params.campaign_id)
+  getData = { abort: () => null }
   getUsers = request.get(USER_API_URL)
 
   componentDidMount() {
+    this.getData = request.get(API_URL + this.props.match.params.campaign_id);
     return Promise.all([
       this.getData.set('Authorization', 'Bearer ' + this.props.app_token),
       this.getUsers.set('Authorization', 'Bearer ' + this.props.app_token)
@@ -195,3 +194,4 @@ class AnnotationCampaignDetail extends Component<ACDProps, ACDState> {
 }
 
 export default AnnotationCampaignDetail;
+export { DownloadButton };
