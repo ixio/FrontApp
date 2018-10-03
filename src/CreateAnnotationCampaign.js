@@ -315,7 +315,7 @@ class CreateAnnotationCampaign extends Component<CACProps, CACState> {
     event.preventDefault();
     this.setState({error: null});
     let res = {
-      name: this.state.new_ac_name.trim() || 'Unnamed Campaign',
+      name: this.state.new_ac_name.trim() || 'Unnamed Campaign',
       desc: this.state.new_ac_desc.trim(),
       datasets: Object.keys(this.state.new_ac_datasets),
       start: this.state.new_ac_start.trim(),

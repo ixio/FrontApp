@@ -13,7 +13,10 @@ import AudioAnnotator from './AudioAnnotator';
 import './css/bootstrap-4.1.3.min.css';
 import './css/app.css';
 
-const Navbar = (props) => (
+type NavbarProps = {
+  logout: (event: SyntheticEvent<HTMLInputElement>) => void
+};
+const Navbar = (props: NavbarProps) => (
   <div className="col-sm-3 border rounded">
     <ul>
       <li><Link to="/datasets">Datasets</Link></li>
@@ -25,7 +28,8 @@ const Navbar = (props) => (
 );
 
 type OdeAppProps = {
-  app_token: string
+  app_token: string,
+  logout: (event: SyntheticEvent<HTMLInputElement>) => void
 };
 const OdeApp = (props: OdeAppProps) => (
   <div className="container">
@@ -73,7 +77,8 @@ class App extends Component<void, AppState> {
     document.cookie = 'token=' + token + ';max-age=2592000';
   }
 
-  logout = (history) => {
+  // The history parameter should be the react-router history
+  logout = (history: Array<string>) => {
     document.cookie = 'token=;max-age=0';
     this.setState({
       app_token: ''
