@@ -61,6 +61,29 @@ class AudioAnnotator extends Component<AudioAnnotatorProps> {
     return (
       <div>
         <div id="audio-annotator" className="undisplayed">
+          <div className="row header">
+              <div className="col s12">
+                  <div className="divider"></div>
+              </div>
+              <div className="col s6">
+              </div>
+              <div className="col s6 ">
+                  <div className="right audio-annotator-instructions">
+                      <a className="waves-effect waves-light modal-trigger right btn" id="trigger" href="#instructions-modal">Instructions</a>
+                  </div>
+              </div>
+          </div>
+          <div id="instructions-modal" className="modal">
+              <div className="modal-footer">
+                  <a href="#!" className="modal-action modal-close waves-effect waves-red btn-flat">Close</a>
+              </div>
+              <div className="modal-content">
+                  <div id="instructions-container"></div>
+                  <div className="videowrapper">
+                      <iframe id="tutorial-video" width="100%" height="100%" frameborder="0" allowfullscreen></iframe>
+                  </div>
+              </div>
+          </div>
           <div className="annotation">
               <div className="labels"></div>
               <div className="audio_visual"></div>
