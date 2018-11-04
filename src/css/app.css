@@ -23,3 +23,13 @@
 .audio-annotator-instructions {
   padding: 10px;
 }
+
+.audio-annotator-instructions-outside {
+  margin-bottom: 0px;
+}
+
+.audio-annotator-legend {
+  position: absolute;
+  top: 90px;
+  left: -12px;
+}

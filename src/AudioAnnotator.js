@@ -61,7 +61,7 @@ class AudioAnnotator extends Component<AudioAnnotatorProps> {
     return (
       <div>
         <div id="audio-annotator" className="undisplayed">
-          <div className="row header">
+          <div className="row header audio-annotator-instructions-outside">
               <div className="col s12">
                   <div className="divider"></div>
               </div>
@@ -80,13 +80,15 @@ class AudioAnnotator extends Component<AudioAnnotatorProps> {
               <div className="modal-content">
                   <div id="instructions-container"></div>
                   <div className="videowrapper">
-                      <iframe id="tutorial-video" width="100%" height="100%" frameborder="0" allowfullscreen></iframe>
+                      <iframe id="tutorial-video" width="100%" height="100%" frameBorder="0" allowFullScreen></iframe>
                   </div>
               </div>
           </div>
           <div className="annotation">
               <div className="labels"></div>
-              <div className="audio_visual"></div>
+              <div className="audio_visual">
+                <img className="audio-annotator-legend" src="/audio-annotator/static/img/legend_120.png" />
+              </div>
               <div className="play_bar"></div>
               <div className="hidden_img"></div>
               <div className="creation_stage_container"></div>
