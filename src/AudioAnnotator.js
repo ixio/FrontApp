@@ -62,12 +62,7 @@ class AudioAnnotator extends Component<AudioAnnotatorProps> {
       <div>
         <div id="audio-annotator" className="undisplayed">
           <div className="row header audio-annotator-instructions-outside">
-              <div className="col s12">
-                  <div className="divider"></div>
-              </div>
-              <div className="col s6">
-              </div>
-              <div className="col s6 ">
+              <div className="col audio-annotator-instructions-outside">
                   <div className="right audio-annotator-instructions">
                       <a className="waves-effect waves-light modal-trigger right btn" id="trigger" href="#instructions-modal">Instructions</a>
                   </div>
