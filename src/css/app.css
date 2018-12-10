@@ -34,3 +34,7 @@
   top: 90px;
   left: -12px;
 }
+
+.audio-annotator-modal {
+  overflow-y: scroll;
+}

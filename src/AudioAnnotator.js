@@ -62,32 +62,32 @@ class AudioAnnotator extends Component<AudioAnnotatorProps> {
       <div>
         <div id="audio-annotator" className="undisplayed">
           <div className="row header audio-annotator-instructions-outside">
-              <div className="col audio-annotator-instructions-outside">
-                  <div className="right audio-annotator-instructions">
-                      <a className="waves-effect waves-light modal-trigger right btn" id="trigger" href="#instructions-modal">Instructions</a>
-                  </div>
+            <div className="col audio-annotator-instructions-outside">
+              <div className="right audio-annotator-instructions">
+                <a className="waves-effect waves-light modal-trigger right btn" id="trigger" href="#instructions-modal">Instructions</a>
               </div>
+            </div>
           </div>
-          <div id="instructions-modal" className="modal">
-              <div className="modal-footer">
-                  <a href="#!" className="modal-action modal-close waves-effect waves-red btn-flat">Close</a>
+          <div id="instructions-modal" className="modal audio-annotator-modal">
+            <div className="modal-footer">
+              <a href="#!" className="modal-action modal-close waves-effect waves-red btn-flat">Close</a>
+            </div>
+            <div className="modal-content">
+              <div id="instructions-container"></div>
+              <div className="videowrapper">
+                <iframe id="tutorial-video" frameBorder="0" scrolling="no" allowFullScreen></iframe>
               </div>
-              <div className="modal-content">
-                  <div id="instructions-container"></div>
-                  <div className="videowrapper">
-                      <iframe id="tutorial-video" width="100%" height="100%" frameBorder="0" allowFullScreen></iframe>
-                  </div>
-              </div>
+            </div>
           </div>
           <div className="annotation">
-              <div className="labels"></div>
-              <div className="audio_visual">
-                <img className="audio-annotator-legend" src="/audio-annotator/static/img/legend_120.png" />
-              </div>
-              <div className="play_bar"></div>
-              <div className="hidden_img"></div>
-              <div className="creation_stage_container"></div>
-              <div className="submit_container"></div>
+            <div className="labels"></div>
+            <div className="audio_visual">
+              <img className="audio-annotator-legend" src="/audio-annotator/static/img/legend_120.png" />
+            </div>
+            <div className="play_bar"></div>
+            <div className="hidden_img"></div>
+            <div className="creation_stage_container"></div>
+            <div className="submit_container"></div>
           </div>
         </div>
         <div id="audio-annotator-loader" className="loader">
