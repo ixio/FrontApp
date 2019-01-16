@@ -1,5 +1,6 @@
 // @flow
 import React, { Component } from 'react';
+import request from 'superagent';
 
 import './css/font-awesome-4.7.0.min.css';
 import './css/audio-annotator/materialize.min.css';
@@ -33,9 +34,36 @@ type AudioAnnotatorProps = {
   app_token: string
 };
 
-class AudioAnnotator extends Component<AudioAnnotatorProps> {
+type AudioAnnotatorState = {
+  tags: Array<string>,
+  chosen_tag: string,
+  start_time: integer
+};
+
+class AudioAnnotator extends Component<AudioAnnotatorProps, AudioAnnotatorState> {
+  state = {
+    tags: [],
+    chosen_tag: null,
+    start_time: new Date().getTime()
+  }
+  getAnnotationTask = { abort: () => null }
+  postAnnotationTask = { abort: () => null }
+
   componentDidMount() {
     let annotation_task_id = this.props.match.params.annotation_task_id;
+    this.postAnnotationTask = request.post(`${API_URL}/${annotation_task_id}/update-results`);
+    this.getAnnotationTask = request.get(`${API_URL}/${annotation_task_id}`);
+    this.getAnnotationTask.set('Authorization', 'Bearer ' + this.props.app_token).then(res => {
+      this.setState({tags: res.body.task.annotationTag})
+    }).catch(err => {
+      if (err.status && err.status === 401) {
+        // Server returned 401 which means token was revoked
+        document.cookie = 'token=;max-age=0';
+        window.location.reload();
+      } else {
+        throw err;
+      }
+    });
     load_script("/audio-annotator/static/js/lib/jquery-2.2.3.min.js");
     load_script("/audio-annotator/static/js/lib/materialize.min.js");
     load_script("/audio-annotator/static/js/lib/wavesurfer.min.js");
@@ -57,7 +85,56 @@ class AudioAnnotator extends Component<AudioAnnotatorProps> {
     run_script(script);
   }
 
+  componentWillUnmount() {
+    this.getAnnotationTask.abort();
+    this.postAnnotationTask.abort();
+  }
+
+  tagClick = (tag: string, event: SyntheticEvent<HTMLInputElement>) => {
+    this.setState({chosen_tag: tag})
+  }
+
+  handleSubmit = (event: SyntheticEvent<HTMLInputElement>) => {
+    let annotation_res = {
+      task_start_time: this.state.start_time,
+      task_end_time: new Date().getTime(),
+      visualization: 'spectrogram',
+      annotations: [{
+        start: 0,
+        end: 0,
+        annotation: this.state.chosen_tag
+      }],
+      deleted_annotations: [],
+      annotation_events: [],
+      play_events: [],
+      final_solution_shown: false
+    };
+    return this.postAnnotationTask.set('Authorization', 'Bearer ' + this.props.app_token).send(annotation_res)
+    .then(res => {
+      console.log(res.body)
+      if (res.body.next_task === null) {
+        this.props.history.push('/annotation_tasks/' + res.body.campaign_id);
+      } else {
+        this.props.history.push('/audio-annotator/' + res.body.next_task);
+        window.location.reload();
+      }
+    }).catch(err => {
+      if (err.status && err.status === 401) {
+        // Server returned 401 which means token was revoked
+        document.cookie = 'token=;max-age=0';
+        window.location.reload();
+      } else {
+        throw err;
+      }
+    });
+  }
+
   render() {
+    let tags = this.state.tags.map((tag, index) => {
+      return (
+        <button key={index} className="annotation_tag btn" onClick={e => this.tagClick(tag, e)}>{tag}</button>
+      )
+    })
     return (
       <div>
         <div id="audio-annotator" className="undisplayed">
@@ -82,12 +159,23 @@ class AudioAnnotator extends Component<AudioAnnotatorProps> {
           <div className="annotation">
             <div className="labels"></div>
             <div className="audio_visual">
-              <img className="audio-annotator-legend" src="/audio-annotator/static/img/legend_120.png" />
+              <img className="audio-annotator-legend" src="/audio-annotator/static/img/legend_8k.png" />
             </div>
             <div className="play_bar"></div>
             <div className="hidden_img"></div>
-            <div className="creation_stage_container"></div>
-            <div className="submit_container"></div>
+            <div className="creation_stage_container" hidden></div>
+            <div className="audio-annotator-tags-container">
+              <div className="audio-annotator-tags-label">
+                Label:
+              </div>
+              <div className="audio-annotator-tags">
+                {tags}
+              </div>
+            </div>
+            <div className="submit_container" hidden></div>
+            <div className="audio-annotator-submit">
+              <button className="btn submit" onClick={this.handleSubmit}>SUBMIT &amp; LOAD NEXT RECORDING</button>
+            </div>
           </div>
         </div>
         <div id="audio-annotator-loader" className="loader">
