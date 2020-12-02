@@ -54,7 +54,7 @@ type AnnotationTask = {
   prevAnnotations: Array<RawAnnotation>,
   campaignId: number,
   instructionsUrl: ?string,
-  startZoom: number,
+  startZoom: ?number,
   filename: string,
   presenceTask: ?boolean,
 };
@@ -265,7 +265,7 @@ class AudioAnnotator extends Component<AudioAnnotatorProps, AudioAnnotatorState>
 
   togglePresenceTag = (tag: string) => {
     if (!this.state.task) {
-      return <p>Unknown error while loading task.</p>
+      throw new Error('Unknown error while loading task')
     }
     const task: AnnotationTask = this.state.task;
     const activeAnn: ?Annotation = this.state.annotations

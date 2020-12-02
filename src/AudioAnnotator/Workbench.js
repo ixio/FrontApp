@@ -108,10 +108,10 @@ class Workbench extends Component<WorkbenchProps, WorkbenchState> {
     this.state = {
       wrapperWidth: CANVAS_WIDTH,
       wrapperHeight: CANVAS_HEIGHT + TIME_AXIS_SIZE + SCROLLBAR_RESERVED,
-      timePxRatio: CANVAS_WIDTH / props.duration * props.startZoom,
+      timePxRatio: CANVAS_WIDTH / props.duration,
       freqPxRatio: CANVAS_HEIGHT / props.frequencyRange,
       currentParams,
-      currentZoom: props.startZoom,
+      currentZoom: 1,
       spectrograms: [],
       newAnnotation: undefined,
       loadingZoomLvl: 1,
@@ -220,6 +220,8 @@ class Workbench extends Component<WorkbenchProps, WorkbenchState> {
     // (the user is able to release the click on any zone)
     document.addEventListener('pointermove', this.onUpdateNewAnnotation);
     document.addEventListener('pointerup', this.onEndNewAnnotation);
+
+    this.updateZoom(this.props.startZoom, null)
   }
 
   componentDidUpdate(prevProps: WorkbenchProps) {
@@ -329,9 +331,6 @@ class Workbench extends Component<WorkbenchProps, WorkbenchState> {
   }
 
   zoom = (direction: number, xFrom: ?number) => {
-    const canvas: HTMLCanvasElement = this.canvasRef.current;
-    const timeAxis: HTMLCanvasElement = this.timeAxisRef.current;
-
     const zoomLevels = this.getSpectrosForCurrentDetails()
       .map(details => details.zoom)
       .sort((a, b) => a - b);
@@ -350,35 +349,42 @@ class Workbench extends Component<WorkbenchProps, WorkbenchState> {
 
     // If zoom factor has changed
     if (newZoom !== this.state.currentZoom) {
-      // New timePxRatio
-      const timePxRatio: number = this.state.wrapperWidth * newZoom / this.props.duration;
-
-      // Compute new center (before resizing)
-      const wrapper: HTMLElement = this.wrapperRef.current;
-      const zoomRatio = newZoom / this.state.currentZoom;
-
-      let newCenter: number = 0;
-      if (xFrom) {
-        // x-coordinate has been given, center on it
-        const bounds: ClientRect = canvas.getBoundingClientRect();
-        newCenter = (xFrom - bounds.left) * zoomRatio;
-      } else {
-        // If no x-coordinate: center on currentTime
-        newCenter = this.props.currentTime * timePxRatio;
-      }
-      const scroll = Math.floor(newCenter - CANVAS_WIDTH / 2);
-
-      // Resize canvases and scroll
-      canvas.width = this.state.wrapperWidth * newZoom;
-      timeAxis.width = this.state.wrapperWidth * newZoom;
-
-      wrapper.scrollLeft = scroll;
-
-      this.setState({
-        currentZoom: newZoom,
-        timePxRatio,
-      });
+      this.updateZoom(newZoom, xFrom)
     }
+  }
+
+  updateZoom = (newZoom: number, xFrom: ?number) => {
+    const canvas: HTMLCanvasElement = this.canvasRef.current;
+    const timeAxis: HTMLCanvasElement = this.timeAxisRef.current;
+
+    // New timePxRatio
+    const timePxRatio: number = this.state.wrapperWidth * newZoom / this.props.duration;
+
+    // Compute new center (before resizing)
+    const wrapper: HTMLElement = this.wrapperRef.current;
+    const zoomRatio = newZoom / this.state.currentZoom;
+
+    let newCenter: number = 0;
+    if (xFrom) {
+      // x-coordinate has been given, center on it
+      const bounds: ClientRect = canvas.getBoundingClientRect();
+      newCenter = (xFrom - bounds.left) * zoomRatio;
+    } else {
+      // If no x-coordinate: center on currentTime
+      newCenter = this.props.currentTime * timePxRatio;
+    }
+    const scroll = Math.floor(newCenter - CANVAS_WIDTH / 2);
+
+    // Resize canvases and scroll
+    canvas.width = this.state.wrapperWidth * newZoom;
+    timeAxis.width = this.state.wrapperWidth * newZoom;
+
+    wrapper.scrollLeft = scroll;
+
+    this.setState({
+      currentZoom: newZoom,
+      timePxRatio,
+    });
   }
 
   onStartNewAnnotation = (event: SyntheticPointerEvent<HTMLCanvasElement>) => {
