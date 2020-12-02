@@ -56,6 +56,7 @@ type AnnotationTask = {
   instructionsUrl: ?string,
   startZoom: number,
   filename: string,
+  presenceTask: ?boolean,
 };
 
 type AudioAnnotatorProps = {
@@ -212,6 +213,11 @@ class AudioAnnotator extends Component<AudioAnnotatorProps, AudioAnnotatorState>
   }
 
   saveAnnotation = (annotation: Annotation) => {
+    if (!this.state.task) {
+      throw new Error('Unknown error while loading task')
+    }
+    const task: AnnotationTask = this.state.task;
+
     const maxId: ?number = this.state.annotations
       .map(ann => parseInt(ann.id, 10))
       .sort((a, b) => b - a)
@@ -221,7 +227,7 @@ class AudioAnnotator extends Component<AudioAnnotatorProps, AudioAnnotatorState>
       {}, annotation, { id: maxId ? (maxId + 1).toString() : '1' }
     );
 
-    if (this.state.annotations.length === 0) {
+    if (this.state.annotations.length === 0 && !task.presenceTask) {
       this.setState({
         toastMsg: {msg: 'Select a tag to annotate the box.', lvl: 'primary'},
       });
@@ -255,6 +261,36 @@ class AudioAnnotator extends Component<AudioAnnotatorProps, AudioAnnotatorState>
       .concat(activated);
 
     this.setState({annotations});
+  }
+
+  togglePresenceTag = (tag: string) => {
+    if (!this.state.task) {
+      return <p>Unknown error while loading task.</p>
+    }
+    const task: AnnotationTask = this.state.task;
+    const activeAnn: ?Annotation = this.state.annotations
+      .find(ann => ann.annotation === tag);
+
+    if (activeAnn) {
+      const annotations: Array<Annotation> = this.state.annotations
+        .filter(ann => ann !== activeAnn);
+
+      this.setState({
+        annotations,
+        toastMsg: undefined,
+      });
+    } else {
+      const newAnnotation: Annotation = {
+        id: '',
+        annotation: tag,
+        startTime: 0,
+        endTime: this.state.duration,
+        startFrequency: task.boundaries.startFrequency,
+        endFrequency: task.boundaries.endFrequency,
+        active: false,
+      };
+      this.saveAnnotation(newAnnotation);
+    }
   }
 
   toggleTag = (tag: string) => {
@@ -409,7 +445,7 @@ class AudioAnnotator extends Component<AudioAnnotatorProps, AudioAnnotatorState>
             startFrequency={task.boundaries.startFrequency}
             frequencyRange={this.state.frequencyRange}
             spectroUrlsParams={task.spectroUrls}
-            annotations={this.state.annotations}
+            annotations={task.presenceTask ? [] : this.state.annotations}
             onAnnotationCreated={this.saveAnnotation}
             onAnnotationUpdated={this.updateAnnotation}
             onAnnotationDeleted={this.deleteAnnotation}
@@ -418,6 +454,7 @@ class AudioAnnotator extends Component<AudioAnnotatorProps, AudioAnnotatorState>
             onSeek={this.seekTo}
             startZoom={task.startZoom || 1}
             filename={task.filename}
+            presenceTask={task.presenceTask}
           >
           </Workbench>
 
@@ -449,27 +486,94 @@ class AudioAnnotator extends Component<AudioAnnotatorProps, AudioAnnotatorState>
             </p>
           </div>
 
-          <div className="row">
-            <div className="col-sm-6">
-              {this.renderActiveAnnotation()}
-            </div>
-            <div className="col-sm-6">
-              <table className="table table-hover">
-                <thead>
-                  <tr className="text-center table-light">
-                    <th colSpan="3">Annotations</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {sortedAnnotations.map(annotation => this.renderListAnnotation(annotation))}
-                </tbody>
-              </table>
-            </div>
-          </div>
+          {this.renderAnnotationBench(sortedAnnotations)}
 
         </div>
       );
     }
+  }
+
+  renderAnnotationBench = (sortedAnnotations: Array<Annotation>) => {
+    if (!this.state.task) {
+      return <p>Unknown error while loading task.</p>
+    }
+    const task: AnnotationTask = this.state.task;
+    if (task.presenceTask) {
+      return (
+        <div className="row">
+          <div className="col-sm-12">
+            {this.renderPresenceAnnotation()}
+          </div>
+        </div>
+      );
+    } else {
+      return (
+        <div className="row">
+          <div className="col-sm-6">
+            {this.renderActiveAnnotation()}
+          </div>
+          <div className="col-sm-6">
+            <table className="table table-hover">
+              <thead>
+                <tr className="text-center table-light">
+                  <th colSpan="3">Annotations</th>
+                </tr>
+              </thead>
+              <tbody>
+                {sortedAnnotations.map(annotation => this.renderListAnnotation(annotation))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      );
+    }
+  }
+
+  renderPresenceAnnotation = () => {
+    if (!this.state.task) {
+      return <p>Unknown error while loading task.</p>
+    }
+    const task: AnnotationTask = this.state.task;
+
+    const selected_tags: Array<string> = this.state.annotations.map(ann => ann.annotation);
+
+    const tags = task.annotationTags.map((tag, idx) => {
+      const color: string = utils.getTagColor(this.state.tagColors, tag);
+
+      const style = {
+        inactive: {
+          backgroundColor: color,
+          border: 'none',
+          color: '#ffffff',
+        },
+        active: {
+          backgroundColor: 'transparent',
+          border: `1px solid ${color}`,
+          color: color,
+        },
+      };
+      return (
+        <li key={`tag-${idx.toString()}`}>
+          <button
+            className="btn"
+            style={(selected_tags.includes(tag)) ? style.active : style.inactive}
+            onClick={() => this.togglePresenceTag(tag)}
+            type="button"
+          >{tag}</button>
+        </li>
+      );
+    });
+
+    return (
+      <div className="card">
+        <h6 className="card-header text-center">Select annotations</h6>
+        <div className="card-body d-flex justify-content-between">
+          <ul className="card-text annotation-tags justify-content-center">
+            {tags}
+          </ul>
+        </div>
+      </div>
+    );
   }
 
   renderActiveAnnotation = () => {

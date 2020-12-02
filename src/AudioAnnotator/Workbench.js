@@ -54,6 +54,7 @@ type WorkbenchProps = {
   onSeek: any,
   startZoom: number,
   filename: string,
+  presenceTask: ?boolean,
 };
 
 type WorkbenchState = {
@@ -646,13 +647,13 @@ class Workbench extends Component<WorkbenchProps, WorkbenchState> {
           style={style.wrapper}
         >
           <canvas
-            className="canvas"
+            className={this.props.presenceTask ? "canvas" : "canvas crosshair"}
             ref={this.canvasRef}
             height={CANVAS_HEIGHT}
             width={CANVAS_WIDTH}
             style={style.canvas}
             onClick={this.seekTo}
-            onPointerDown={this.onStartNewAnnotation}
+            onPointerDown={this.props.presenceTask ? () => null : this.onStartNewAnnotation}
             onWheel={this.onWheelZoom}
           ></canvas>
 

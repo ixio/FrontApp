@@ -119,6 +119,9 @@ html {
 .canvas {
   display: block;
   position: absolute;
+}
+
+.crosshair {
   cursor: crosshair;
 }
 
