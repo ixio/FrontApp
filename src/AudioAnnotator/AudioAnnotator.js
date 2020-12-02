@@ -55,6 +55,7 @@ type AnnotationTask = {
   campaignId: number,
   instructionsUrl: ?string,
   startZoom: number,
+  filename: string,
 };
 
 type AudioAnnotatorProps = {
@@ -416,6 +417,7 @@ class AudioAnnotator extends Component<AudioAnnotatorProps, AudioAnnotatorState>
             onAnnotationPlayed={this.play}
             onSeek={this.seekTo}
             startZoom={task.startZoom || 1}
+            filename={task.filename}
           >
           </Workbench>
 

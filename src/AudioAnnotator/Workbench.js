@@ -53,6 +53,7 @@ type WorkbenchProps = {
   onAnnotationSelected: (Annotation) => void,
   onSeek: any,
   startZoom: number,
+  filename: string,
 };
 
 type WorkbenchState = {
@@ -617,6 +618,7 @@ class Workbench extends Component<WorkbenchProps, WorkbenchState> {
         style={style.workbench}
       >
         <p className="workbench-controls">
+          <b>{this.props.filename}</b>
           <select defaultValue={this.state.currentParams} onChange={this.changeCurrentParams}>
             {this.props.spectroUrlsParams.map((params, idx) => {
               return (
