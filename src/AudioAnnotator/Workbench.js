@@ -52,6 +52,7 @@ type WorkbenchProps = {
   onAnnotationPlayed: (Annotation) => void,
   onAnnotationSelected: (Annotation) => void,
   onSeek: any,
+  startZoom: number,
 };
 
 type WorkbenchState = {
@@ -105,10 +106,10 @@ class Workbench extends Component<WorkbenchProps, WorkbenchState> {
     this.state = {
       wrapperWidth: CANVAS_WIDTH,
       wrapperHeight: CANVAS_HEIGHT + TIME_AXIS_SIZE + SCROLLBAR_RESERVED,
-      timePxRatio: CANVAS_WIDTH / props.duration,
+      timePxRatio: CANVAS_WIDTH / props.duration * props.startZoom,
       freqPxRatio: CANVAS_HEIGHT / props.frequencyRange,
       currentParams,
-      currentZoom: 1,
+      currentZoom: props.startZoom,
       spectrograms: [],
       newAnnotation: undefined,
       loadingZoomLvl: 1,
