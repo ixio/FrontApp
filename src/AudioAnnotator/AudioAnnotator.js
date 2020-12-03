@@ -6,6 +6,7 @@ import * as utils from '../utils';
 
 import AudioPlayer from './AudioPlayer';
 import Workbench from './Workbench';
+import AnnotationTagAdder from '../AnnotationTagAdder';
 
 import type { ToastMsg } from '../Toast';
 import Toast from '../Toast';
@@ -57,6 +58,7 @@ type AnnotationTask = {
   startZoom: ?number,
   filename: string,
   presenceTask: ?boolean,
+  annotationSetId: number,
 };
 
 type AudioAnnotatorProps = {
@@ -291,6 +293,18 @@ class AudioAnnotator extends Component<AudioAnnotatorProps, AudioAnnotatorState>
       };
       this.saveAnnotation(newAnnotation);
     }
+  }
+
+  handleNewTag = (tag: string) => {
+    if (!this.state.task) {
+      throw new Error('Unknown error while loading task')
+    }
+    const task: AnnotationTask = this.state.task;
+    const updatedTask: AnnotationTask = Object.assign(
+      {}, task, { annotationTags: task.annotationTags.concat(tag) }
+    );
+    this.setState({ task: updatedTask });
+    this.toggleTag(tag);
   }
 
   toggleTag = (tag: string) => {
@@ -570,6 +584,13 @@ class AudioAnnotator extends Component<AudioAnnotatorProps, AudioAnnotatorState>
         <div className="card-body d-flex justify-content-between">
           <ul className="card-text annotation-tags justify-content-center">
             {tags}
+            <li>
+              <AnnotationTagAdder
+                app_token={this.props.app_token}
+                annotationSetId={task.annotationSetId}
+                onTagCreation={this.handleNewTag}
+              ></AnnotationTagAdder>
+            </li>
           </ul>
         </div>
       </div>
