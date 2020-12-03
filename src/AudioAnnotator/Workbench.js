@@ -114,7 +114,7 @@ class Workbench extends Component<WorkbenchProps, WorkbenchState> {
       currentZoom: 1,
       spectrograms: [],
       newAnnotation: undefined,
-      loadingZoomLvl: 1,
+      loadingZoomLvl: this.props.startZoom,
     };
 
     this.wrapperRef = React.createRef();
@@ -177,9 +177,10 @@ class Workbench extends Component<WorkbenchProps, WorkbenchState> {
 
       if (isZoomLvlLoaded) {
         // Go on with next level if exists
-        const zoomLevels = this.getSpectrosForCurrentDetails()
+        let zoomLevels = this.getSpectrosForCurrentDetails()
           .map(details => details.zoom)
           .sort((a, b) => a - b);
+        utils.arrayMove(zoomLevels, Math.log(this.props.startZoom) / Math.log(2), 0)
         const zoomIdx: number = zoomLevels.findIndex(factor => factor === this.state.loadingZoomLvl);
 
         if (zoomIdx < zoomLevels.length - 1) {
@@ -213,7 +214,8 @@ class Workbench extends Component<WorkbenchProps, WorkbenchState> {
 
   componentDidMount() {
     // Handling spectrogram images
-    const spectrograms: Array<SpectroDetails> = this.buildSpectrogramsDetails(this.props.spectroUrlsParams);
+    let spectrograms: Array<SpectroDetails> = this.buildSpectrogramsDetails(this.props.spectroUrlsParams);
+    utils.arrayMove(spectrograms, Math.log(this.props.startZoom) / Math.log(2), 0)
     this.setState({spectrograms}, this.loadNextZoomLevel);
 
     // Add event listeners at the document level

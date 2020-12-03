@@ -9,6 +9,14 @@ export function arrayToObject(array: Array<any>, key: any) {
   }, {});
 }
 
+// https://stackoverflow.com/a/6470794
+export function arrayMove(array: Array<any>, fromIndex: number, toIndex: number): Array<any> {
+  const element = array[fromIndex];
+  array.splice(fromIndex, 1);
+  return array.splice(toIndex, 0, element);
+}
+
+
 // Object.values alternative for flow (cf https://github.com/facebook/flow/issues/2221)
 export function objectValues(obj: any): Array<any> {
   return Object.keys(obj).map(key => obj[key]);
